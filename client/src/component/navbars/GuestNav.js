@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Container, Nav, Navbar, NavLink } from "react-bootstrap";
+import { Button, Container } from "react-bootstrap";
 import RegisterModal from "../modals/RegisterModal";
 import logo from "../../assets/logo.svg";
 import LoginModal from "../modals/LoginModal";
@@ -18,7 +18,7 @@ function GuestNav(props) {
   return (
     <>
       <div className="nav-headers">
-        <div className="containers">
+        <Container className="navbars">
           <img
             src={logo}
             onClick={() => router.push("/")}
@@ -26,20 +26,27 @@ function GuestNav(props) {
             alt="brand"
           />
           <div>
-            <Button onClick={handleShow} className="button1">
+            <Button onClick={handleShow} className="button2">
               Login
             </Button>
             <Button onClick={handleShowRegis} className="button1">
               Register
             </Button>
           </div>
-        </div>
+        </Container>
+        <Container  >
+          <h1 className="textH1 mt-5">The Journey </h1>
+          <h1 className="textH1"> you never dreamed of.</h1>
+          <p className=" textSubtittle mt-5">
+            We made a tool so you can easily keep & share your travel memories.<br/>
+            But there is a lot more
+          </p>
+        </Container>
       </div>
       <LoginModal
         show={show}
         handleClose={handleClose}
         regis={handleShowRegis}
-        setData={props.setData}
       />
       <RegisterModal
         show={showRegis}

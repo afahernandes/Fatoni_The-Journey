@@ -15,13 +15,9 @@ import DetailJourney from "./pages/DetailJourney";
 import Profile from "./pages/Profile";
 import NewJourney from "./pages/NewJourney";
 import Bookmark from "./pages/Bookmark";
+import UpdateJourney from "./pages/UpdateJourney";
 
-
-// init token on axios every time the app is refreshed
-if (localStorage.token) {
-  setAuthToken(localStorage.token);
-}
-
+//init token on axios every time the app is refreshed
 
 function App() {
   const [state, dispatch] = useContext(AppContext);
@@ -31,52 +27,51 @@ function App() {
     }
   }, [state]);
 
-  
-
   useEffect(() => {
-    const checkUser = async () => {
+    const checkAuth = async () => {
       try {
         const response = await API.get("/check-auth");
-         if (response.status === 404) {
+        const getBookmarks = await API.get("/userbookmark");
+        if (response.status === 404) {
           return dispatch({
             type: "AUTH_ERROR",
           });
         }
         let payload = response.data.data.user;
         payload.token = localStorage.token;
-  
         dispatch({
           type: "USER_SUCCESS",
           payload,
+        });
+
+        dispatch({
+          type: "GET_BOOKMARK",
+          payload: getBookmarks.data.data.bookmarks,
         });
       } catch (error) {
         console.log(error);
       }
     };
-    checkUser();
+    checkAuth();
+    document.body.style.backgroundColor = "#E5E5E5";
   }, []);
 
   return (
     <Router>
-      <div style={{backgroundColor:"#E5E5E5"}}>
-        <Header />
-        <Container>
-          <Row className="justify-content-md-center">
-            <Switch>
-              <Route path="/" exact component={Home} />
-              <PrivateRoute path="/profile" exact component={Profile} />
-              <PrivateRoute path="/newjourney" exact component={NewJourney} />
-              <PrivateRoute path="/bookmark" exact component={Bookmark} />
-              <PrivateRoute
-                path="/journey/:id"
-                exact
-                component={DetailJourney}
-              /> 
-              <Route component={NotFound} />
-            </Switch>
-          </Row>
-        </Container>
-      </div>
+      <Header />
+      <Container>
+        <Row className="justify-content-md-center">
+          <Switch>
+            <Route path="/" exact component={Home} />
+            <PrivateRoute path="/profile" exact component={Profile} />
+            <PrivateRoute path="/newjourney" exact component={NewJourney} />
+            <PrivateRoute path="/updatejourney/:id" exact component={UpdateJourney} />
+            <PrivateRoute path="/bookmark" exact component={Bookmark} />
+            <PrivateRoute path="/journey/:id" exact component={DetailJourney} />
+            <Route component={NotFound} />
+          </Switch>
+        </Row>
+      </Container>
     </Router>
   );
 }

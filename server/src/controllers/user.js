@@ -55,15 +55,15 @@ exports.getUser = async (req, res) => {
   }
 };
 
-
 exports.updateUser = async (req, res) => {
   try {
     const { body } = req;
     const id = req.user.id;
+    console.log("Image", req.file.filename);
 
     const newUser = {
       ...body,
-   //   image: req.file.filename,
+      image: req.file.filename,
     };
     await User.update(newUser, {
       where: {

@@ -1,11 +1,11 @@
-const { Journey,User } = require("../../models");
-const { Op } = require('sequelize');
+const { Journey, User } = require("../../models");
+const { Op } = require("sequelize");
 
 exports.addJourney = async (req, res) => {
   try {
     const { body } = req;
     const userId = req.user.id;
-  
+
     const newJourney = await Journey.create({
       ...body,
       userId,
@@ -30,17 +30,14 @@ exports.getJourneys = async (req, res) => {
       attributes: {
         exclude: ["userId", "updatedAt"],
       },
-      order:[[
-        "createdAt","DESC" 
-      ]],
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: User,
           as: "Users",
-          attributes: ["id","fullname","email","phone","address"],
-          
+          attributes: ["id", "fullname", "email", "phone", "address"],
         },
-      ]
+      ],
     });
 
     res.send({
@@ -48,7 +45,7 @@ exports.getJourneys = async (req, res) => {
       data: { journeys },
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
       status: "failed get resources",
     });
@@ -63,17 +60,15 @@ exports.getJourney = async (req, res) => {
         id,
       },
       attributes: {
-        exclude: ["userId","updatedAt"],
+        exclude: ["userId", "updatedAt"],
       },
       include: [
         {
           model: User,
           as: "Users",
-          attributes: ["id","fullname","email","phone","address"],
-          
+          attributes: ["id", "fullname", "email", "phone", "address"],
         },
-      ]
-
+      ],
     });
 
     res.send({
@@ -87,12 +82,9 @@ exports.getJourney = async (req, res) => {
   }
 };
 
-
 exports.getLastJourney = async (req, res) => {
-  console.log("zz",req.query);
- 
   const { createdAt } = req.query;
- 
+
   const DateStart = new Date(createdAt).setHours(0, 0, 0, 0);
   const DateEnd = new Date(createdAt).setHours(23, 59, 59, 999);
 
@@ -100,11 +92,10 @@ exports.getLastJourney = async (req, res) => {
     const journeys = await Journey.findAll({
       where: {
         createdAt: {
-          [Op.between]:  [DateStart, DateEnd],
-         },
-      },order:[[
-        "createdAt","DESC" 
-      ]],
+          [Op.between]: [DateStart, DateEnd],
+        },
+      },
+      order: [["createdAt", "DESC"]],
       attributes: {
         exclude: ["userId", "updatedAt"],
       },
@@ -112,11 +103,9 @@ exports.getLastJourney = async (req, res) => {
         {
           model: User,
           as: "Users",
-          attributes: ["id","fullname","email","phone","address"],
-          
+          attributes: ["id", "fullname", "email", "phone", "address"],
         },
-      ]
-
+      ],
     });
 
     res.send({
@@ -124,7 +113,7 @@ exports.getLastJourney = async (req, res) => {
       data: { journeys },
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
       status: "failed",
     });
@@ -138,9 +127,7 @@ exports.getUserJourney = async (req, res) => {
       where: {
         userId,
       },
-      order:[[
-        "createdAt","DESC" 
-      ]],
+      order: [["createdAt", "DESC"]],
       attributes: {
         exclude: ["userId", "updatedAt"],
       },
@@ -148,11 +135,9 @@ exports.getUserJourney = async (req, res) => {
         {
           model: User,
           as: "Users",
-          attributes: ["id","fullname","email","phone","address"],
-          
+          attributes: ["id", "fullname", "email", "phone", "address"],
         },
-      ]
-
+      ],
     });
 
     res.send({
@@ -160,7 +145,6 @@ exports.getUserJourney = async (req, res) => {
       data: { journeys },
     });
   } catch (error) {
-    
     console.log(error);
     res.status(500).send({
       status: "failed",
@@ -174,7 +158,7 @@ exports.updateJourney = async (req, res) => {
     const { id } = req.params;
     const newJourney = {
       ...body,
-   //   image: req.file.filename,
+      image: req.file.filename,
     };
     await Journey.update(newJourney, {
       where: {

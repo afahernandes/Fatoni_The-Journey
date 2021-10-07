@@ -17,7 +17,7 @@ function Header() {
 
   return (
     <>
-      {state.isLogin ? <UserNav handleLogout={handleLogout} /> : <GuestNav />}
+      {state.isLogin?<UserNav handleLogout={handleLogout} /> : <GuestNav />}
     </>
   );
 }

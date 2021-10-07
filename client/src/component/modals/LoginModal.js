@@ -1,13 +1,18 @@
 import React, { useContext, useState } from "react";
 import { AppContext } from "../../context/AppContext";
-import { Form, Button, Modal } from "react-bootstrap";
+import { Form, Button, Modal, Alert } from "react-bootstrap";
 import { useHistory } from "react-router";
-
-import { API } from "../../config/api";
+import maps from "../../assets/maps.svg";
+import leaf from "../../assets/leaf.png";
+import { API, setAuthToken } from "../../config/api";
 import Swal from "sweetalert2";
 
 function LoginModal(props) {
   const { handleClose, show, regis } = props;
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [message, setMessage] = useState("");
+
   const [state, dispatch] = useContext(AppContext);
   const router = useHistory();
 
@@ -25,34 +30,34 @@ function LoginModal(props) {
     e.preventDefault();
     try {
       const body = JSON.stringify(formData);
-
       const config = {
         headers: {
           "Content-Type": "application/json",
         },
       };
-
       const response = await API.post("/login", body, config);
-      // Notification
+      console.log(response);
+      setAuthToken(response.data.data.token);
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: response.data.data,
       });
-
-      handleClose();
-      window.location.reload();
-    } catch (error) {
-      Swal.fire({
-        text: "Login Failed !",
-        icon: "error",
-        confirmButtonColor: "blue",
+      const getBookmarks = await API.get("/userbookmark");
+      dispatch({
+        type: "GET_BOOKMARK",
+        payload: getBookmarks.data.data.bookmarks,
       });
-      console.log(error);
+      handleClose();
+    } catch (error) {
+      console.log({ error });
+      setMessage("Username or password is invalid!");
+      setShowAlert(true);
     }
   };
 
   function handleChange(e) {
     e.preventDefault();
+    setShowAlert(false);
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -60,18 +65,28 @@ function LoginModal(props) {
   }
 
   return (
-    <Modal show={show} onHide={handleClose} animation={false}>
-      <Modal.Body>
-        <Form style={{ margin: "20px" }} onSubmit={handleOnSubmit}>
+    <Modal
+      show={show}
+      onHide={handleClose}
+      dialogClassName="modalContainer"
+      aria-labelledby="contained-modal-title-vcenter"
+    >
+      <img src={maps} alt="maps" className="img-maps" />
+      <img src={leaf} alt="leaf" className="img-leaf" />
+
+      <Modal.Body className="md-2 px-3">
+        <Form onSubmit={handleOnSubmit}>
           <center>
-            <h2>
+            <h2 className="my-5">
               <b>Login</b>
             </h2>
           </center>
 
+          {showAlert && <Alert variant="danger">{message}</Alert>}
+
           <Form.Group className="formGroup" controlId="email">
-            <Form.Label className="fromLabel">
-              <b>Email address</b>
+            <Form.Label className="formLabelInput">
+              <b>Email</b>
             </Form.Label>
             <Form.Control
               className="formInput"
@@ -82,7 +97,7 @@ function LoginModal(props) {
             />
           </Form.Group>
           <Form.Group className="formGroup" controlId="password">
-            <Form.Label className="fromLabel">
+            <Form.Label className="formLabelInput">
               <b>Password</b>
             </Form.Label>
             <Form.Control
@@ -94,10 +109,10 @@ function LoginModal(props) {
             />
           </Form.Group>
 
-          <Button className="button1" style={{ width: "100%" }} type="submit">
-            Submit
+          <Button className="button1 mt-3" style={{ width: "100%", fontWeight: "bold" }} type="submit">
+            Login
           </Button>
-          <Form.Label className="formLabelCenter">
+          <Form.Label className="formLabelCenter mt-3">
             Don't have an account ?
             <Form.Label onClick={toSwitch}>
               <b>Click Here</b>

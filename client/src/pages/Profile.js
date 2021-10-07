@@ -1,21 +1,28 @@
-import { useEffect, useState } from "react";
-import { Col, Container, Form, Row, Button, Image } from "react-bootstrap";
-import { useHistory } from "react-router";
+import { useContext, useEffect, useState } from "react";
+import { Col, Row, Image, Container } from "react-bootstrap";
 import CardJourney from "../component/cardJourney";
 import { API, Path } from "../config/api";
 import imgprofile from "../assets/profile.png";
+import Button from "@restart/ui/esm/Button";
+import UpdateProfile from "../component/modals/UpdateProfileModal";
+import { AppContext } from "../context/AppContext";
+import { useHistory } from "react-router";
 
 function Profile() {
-  const router = useHistory();
+  const history = useHistory();
   const [profile, setProfile] = useState({});
+  const [state, dispatch] = useContext(AppContext);
   const [journeys, setJourneys] = useState([]);
-  const [wait, setWait] = useState(false);
+
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   const getProfile = async () => {
     try {
       const getProfile = await API.get("/profile");
       const getJourneys = await API.get("/userjourney");
-      console.log("profile",getJourneys)
+      console.log("profile", getJourneys);
       setProfile(getProfile.data.data.users);
       setJourneys(getJourneys.data.data.journeys);
     } catch (error) {
@@ -25,26 +32,26 @@ function Profile() {
 
   useEffect(() => {
     getProfile();
-  }, []);
+  }, [state.user]);
 
- 
+  useEffect(() => {
+    getProfile();
+  }, [state.update]);
 
   return (
-    <div>
+    <Container>
       <h1 className="textHeader">Profile</h1>
-      <div>
+      <Row>
         <center>
-        {profile.image ? (
+          {profile.image ? (
             <Image
-              src={Path+profile.image}
+              src={Path + profile.image}
               alt="profile"
+              className="img-avatar"
               style={{
                 width: "150px",
                 height: "150px",
-                position: "relative",
-                transform: "translate(15px, -3px)",
               }}
-              className="img-avatar"
             />
           ) : (
             <Image
@@ -54,31 +61,25 @@ function Profile() {
               style={{
                 width: "150px",
                 height: "150px",
-                position: "relative",
-                transform: "translate(15px, -3px)",
               }}
             />
           )}
-           <h5>{profile.fullname}</h5>
-           <p>{profile.email}</p>
-           {/* <Button className="button1">
-              Edit Profile 
-            </Button> */}
-
+          <h4 className="mt-3">{profile.fullname}</h4>
+          <p>{profile.email}</p>
+          <Button className="btn button1" onClick={handleShow}>
+            Edit Profile
+          </Button>
         </center>
-      </div>
-      <Row style={{marginTop:"50px"}}>
+      </Row>
+      <Row className="scroll-item2" style={{ marginTop: "50px" }}>
         {journeys.map((journey) => (
-          <Col md={3}>
-            <CardJourney
-              journey={journey}
-              key={journey.id}
-              checked={true}
-            />
+          <Col md={3} key={journey.id}>
+            <CardJourney journey={journey} isChecked={false} isMine={true} />
           </Col>
         ))}
       </Row>
-    </div>
+      <UpdateProfile size="lg" show={show} handleClose={handleClose} id="example-modal-sizes-title-lg" />
+    </Container>
   );
 }
 

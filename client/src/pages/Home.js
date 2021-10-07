@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
-import { Col, Container, Form, Row, Button } from "react-bootstrap";
+import { useContext, useEffect, useState } from "react";
+import { Col, Form, Row, Button, InputGroup } from "react-bootstrap";
 import CardJourney from "../component/cardJourney";
 import { API } from "../config/api";
-
+import { AppContext } from "../context/AppContext";
 function Home() {
+  const [state, dispatch] = useContext(AppContext);
   let [journeys, setJourneys] = useState([]);
   const [search, setSearch] = useState("");
   const [filteredJourneys, setFilteredJourney] = useState([]);
 
- 
   const fetchJourneys = async () => {
     try {
       const response = await API("/journeys");
@@ -18,46 +18,54 @@ function Home() {
     }
   };
 
-
   useEffect(() => {
     fetchJourneys();
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
-    setFilteredJourney(
-      journeys.filter((journey) =>
-      journey.title.toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }, [search,journeys]);
+    setFilteredJourney(journeys.filter((journey) => journey.title.toLowerCase().includes(search.toLowerCase())));
+  }, [search, journeys]);
+
   return (
     <div>
       <h1 className="textHeader">Journey</h1>
-      <div className="search-container" >
-        <Form.Group  
-            className="formInputSearch" controlId="search">
+      <div id="searchForm" className="mt-5 mb-5 mx-5">
+        <InputGroup>
           <Form.Control
             type="text"
             onChange={(e) => setSearch(e.target.value)}
             name="search"
+            className="formInputSearch"
             placeholder="Search"
           />
-          <Button className="button1" style={{ width: "180", height:"90"}} type="submit">
-          Search
-        </Button>
-        </Form.Group>
-        
+          <Button className="button1" type="submit">
+            Search
+          </Button>
+        </InputGroup>
       </div>
       <Row>
-        {filteredJourneys.map((journey) => (
-          <Col md={3}>
-            <CardJourney
-              journey={journey}
-              key={journey.id}
-              checked={false}
-            />
-          </Col>
-        ))}
+        {filteredJourneys.map((journey) => {
+          let isChecked = false;
+          let isMine = false;
+
+          state.bookmarks.length > 0
+            ? state.bookmarks.map((id) => {
+                if (journey.id === id) {
+                  isChecked = true;
+                }
+              })
+            : (isChecked = false);
+
+          if (journey.Users.id === state.user.id) {
+            isMine = true;
+          }
+
+          return (
+            <Col md={3} key={journey.id}>
+              <CardJourney journey={journey} isChecked={isChecked} isMine={false} />
+            </Col>
+          );
+        })}
       </Row>
     </div>
   );
